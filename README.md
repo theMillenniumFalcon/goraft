@@ -1,0 +1,1 @@
+An implementation of raft consensus algorithm for distributes systems in go
