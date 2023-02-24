@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/theMillenniumFalcon/goraft/cache"
 )
@@ -84,14 +86,27 @@ func (s *Server) handleCommand(conn net.Conn, rawCmd []byte) {
 			return
 		}
 
-		var (
-			key   = []byte(parts[1])
-			value = []byte(parts[2])
-			ttl   = []byte(parts[3])
-		)
+		ttl, err := strconv.Atoi(parts[3])
+		if err != nil {
+			log.Println("invalid SET command")
+			return
+		}
+
+		msg := MSGSet{
+			Key:   []byte(parts[1]),
+			Value: []byte(parts[2]),
+			TTL:   time.Duration(ttl),
+		}
+
+		if err := s.handleSetCommand(conn, msg); err != nil {
+			// respond
+			return
+		}
 	}
 }
 
-func (s *Server) handleSetCommand(conn net.Conn) error {
+func (s *Server) handleSetCommand(conn net.Conn, msg MSGSet) error {
+	fmt.Println("Handling the set command: ", msg)
+
 	return nil
 }

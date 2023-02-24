@@ -10,9 +10,9 @@ const (
 )
 
 type MSGSet struct {
-	Key []byte
-	Set []byte
-	TTL time.Duration
+	Key   []byte
+	Value []byte
+	TTL   time.Duration
 }
 
 type MSGGet struct {
