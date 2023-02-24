@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/theMillenniumFalcon/goraft/cache"
 )
@@ -63,6 +64,34 @@ func (s *Server) handleConn(conn net.Conn) {
 	}
 }
 
-func (s *Server) handleCommand(conn net.Conn, cmd any) {
+func (s *Server) handleCommand(conn net.Conn, rawCmd []byte) {
+	var (
+		rawString = string(rawCmd)
+		parts     = strings.Split(rawString, " ")
+	)
 
+	if len(parts) == 0 {
+		/// respond
+		log.Println("invalid command")
+		return
+	}
+
+	cmd := Command(parts[0])
+	if cmd == CMDSET {
+		if len(parts) != 4 {
+			// respond
+			log.Println("invalid SET command")
+			return
+		}
+
+		var (
+			key   = []byte(parts[1])
+			value = []byte(parts[2])
+			ttl   = []byte(parts[3])
+		)
+	}
+}
+
+func (s *Server) handleSetCommand(conn net.Conn) error {
+	return nil
 }
