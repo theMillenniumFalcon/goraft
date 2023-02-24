@@ -1,4 +1,4 @@
-# miniraft
+# goraft
 ### An implementation of raft consensus algorithm for distributes systems in go
 
 This crate is a minimal implementation of the Raft consensus protocol with a focus on readability/understandability.
