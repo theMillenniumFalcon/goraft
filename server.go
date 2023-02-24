@@ -46,5 +46,20 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) handleConn(conn net.Conn) {
+	defer func() {
+		conn.Close()
+	}()
 
+	buf := make([]byte, 2048)
+
+	for {
+		n, err := conn.Read(buf)
+		if err != nil {
+			log.Printf("connn read error: %s\n", err)
+			break
+		}
+
+		msg := buf[:n]
+		fmt.Println(string(msg))
+	}
 }
