@@ -59,7 +59,10 @@ func (s *Server) handleConn(conn net.Conn) {
 			break
 		}
 
-		msg := buf[:n]
-		fmt.Println(string(msg))
+		go s.handleCommand(conn, buf[:n])
 	}
+}
+
+func (s *Server) handleCommand(conn net.Conn, cmd any) {
+
 }
