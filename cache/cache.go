@@ -34,4 +34,8 @@ func (c *Cache) Get(key []byte) ([]byte, error) {
 func (c *Cache) Delete(key []byte) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+
+	delete(c.data, string(key))
+
+	return nil
 }
