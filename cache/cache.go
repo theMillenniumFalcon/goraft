@@ -24,6 +24,10 @@ func (c *Cache) Set(key, value []byte, timeToLive time.Duration) error {
 func (c *Cache) Has(key []byte) bool {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+
+	_, ok := c.data[string(key)]
+
+	return ok
 }
 
 func (c *Cache) Get(key []byte) ([]byte, error) {
