@@ -41,6 +41,7 @@ func (s *Server) Start() error {
 	if !s.IsLeader {
 		go func() {
 			conn, err := net.Dial("tcp", s.LeaderAddr)
+			fmt.Println("connected with leader: ", s.LeaderAddr)
 			if err != nil {
 				log.Fatal(err)
 			}
