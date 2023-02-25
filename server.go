@@ -17,6 +17,7 @@ type ServerOptions struct {
 
 type Server struct {
 	ServerOptions
+	// TODO: only allocate this when we ae the leader of nodes
 	followers map[net.Conn]struct{}
 	cache     cache.Cacher
 }
@@ -112,5 +113,13 @@ func (s *Server) handleGetCommand(conn net.Conn, msg *Message) error {
 }
 
 func (s *Server) sendToFollowers(ctx context.Context, msg *Message) error {
+	for conn := range s.followers {
+		_, err := conn.Write(msg.ToBytes())
+		if err != nil {
+			fmt.Println("write to follower error: ", err)
+			continue
+		}
+	}
+
 	return nil
 }
