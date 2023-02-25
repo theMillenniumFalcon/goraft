@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/theMillenniumFalcon/goraft/cache"
 )
@@ -67,45 +64,19 @@ func (s *Server) handleConn(conn net.Conn) {
 }
 
 func (s *Server) handleCommand(conn net.Conn, rawCmd []byte) {
-	var (
-		rawString = string(rawCmd)
-		parts     = strings.Split(rawString, " ")
-	)
-
-	if len(parts) == 0 {
-		/// respond
-		log.Println("invalid command")
+	msg, err := parseMessage(rawCmd)
+	if err != nil {
+		fmt.Println("failed to parse the command with error: ", err)
+		// respond
 		return
 	}
-
-	cmd := Command(parts[0])
-	if cmd == CMDSET {
-		if len(parts) != 4 {
-			// respond
-			log.Println("invalid SET command")
-			return
-		}
-
-		ttl, err := strconv.Atoi(parts[3])
-		if err != nil {
-			log.Println("invalid SET command")
-			return
-		}
-
-		msg := MSGSet{
-			Key:   []byte(parts[1]),
-			Value: []byte(parts[2]),
-			TTL:   time.Duration(ttl),
-		}
-
-		if err := s.handleSetCommand(conn, msg); err != nil {
-			// respond
-			return
-		}
+	if err := s.handleSetCommand(conn, msg); err != nil {
+		// respond
+		return
 	}
 }
 
-func (s *Server) handleSetCommand(conn net.Conn, msg MSGSet) error {
+func (s *Server) handleSetCommand(conn net.Conn, msg *Message) error {
 	fmt.Println("Handling the set command: ", msg)
 
 	return nil
