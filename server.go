@@ -98,7 +98,14 @@ func (s *Server) handleSetCommand(conn net.Conn, msg *Message) error {
 }
 
 func (s *Server) handleGetCommand(conn net.Conn, msg *Message) error {
-	return nil
+	val, err := s.cache.Get(msg.Key)
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Write(val)
+
+	return err
 }
 
 func (s *Server) sendToFollowers(ctx context.Context, msg *Message) error {
