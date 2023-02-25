@@ -72,6 +72,8 @@ func (s *Server) handleCommand(conn net.Conn, rawCmd []byte) {
 		return
 	}
 
+	fmt.Printf("recieved command %s\n", msg.Cmd)
+
 	switch msg.Cmd {
 	case CMDSet:
 		err = s.handleSetCommand(conn, msg)
