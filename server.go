@@ -84,11 +84,11 @@ func (s *Server) handleSetCommand(conn net.Conn, msg *Message) error {
 		return err
 	}
 
-	go s.sendToFollowers(context.TODO())
+	go s.sendToFollowers(context.TODO(), msg)
 
 	return nil
 }
 
-func (s *Server) sendToFollowers(ctx context.Context) error {
+func (s *Server) sendToFollowers(ctx context.Context, msg *Message) error {
 	return nil
 }
