@@ -23,6 +23,12 @@ func (c *Cache) Set(key, value []byte, timeToLive time.Duration) error {
 
 	c.data[string(key)] = value
 
+	ticker := time.NewTicker(timeToLive)
+	go func() {
+		<-ticker.C
+		delete(c.data, string(key))
+	}()
+
 	return nil
 }
 

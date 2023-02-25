@@ -15,10 +15,10 @@ const (
 )
 
 type Message struct {
-	Cmd   Command
-	Key   []byte
-	Value []byte
-	TTL   time.Duration
+	Cmd        Command
+	Key        []byte
+	Value      []byte
+	timeToLive time.Duration
 }
 
 func parseMessage(raw []byte) (*Message, error) {
@@ -43,11 +43,11 @@ func parseMessage(raw []byte) (*Message, error) {
 			return nil, errors.New("invalid SET command")
 		}
 		msg.Value = []byte(parts[2])
-		ttl, err := strconv.Atoi(parts[3])
+		timeToLive, err := strconv.Atoi(parts[3])
 		if err != nil {
-			return nil, errors.New("invalid SET TTL")
+			return nil, errors.New("invalid SET timeToLive")
 		}
-		msg.TTL = time.Duration(ttl)
+		msg.timeToLive = time.Duration(timeToLive)
 	}
 
 	return msg, nil
