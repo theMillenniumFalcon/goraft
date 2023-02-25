@@ -38,6 +38,16 @@ func (s *Server) Start() error {
 
 	log.Printf("server starting on port [%s]\n", s.ListenAddr)
 
+	if !s.IsLeader {
+		go func() {
+			conn, err := net.Dial("tcp", s.LeaderAddr)
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.handleConn(conn)
+		}()
+	}
+
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
@@ -49,9 +59,7 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) handleConn(conn net.Conn) {
-	defer func() {
-		conn.Close()
-	}()
+	defer conn.Close()
 
 	buf := make([]byte, 2048)
 
