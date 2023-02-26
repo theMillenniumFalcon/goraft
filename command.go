@@ -26,7 +26,7 @@ func (m *Message) ToBytes() []byte {
 	switch m.Cmd {
 
 	case CMDSet:
-		cmd := fmt.Sprintf("%s %s %s %s", m.Cmd, m.Key, m.Value, m.timeToLive)
+		cmd := fmt.Sprintf("%s %s %s %d", m.Cmd, m.Key, m.Value, m.timeToLive)
 		return []byte(cmd)
 
 	case CMDGet:

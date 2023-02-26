@@ -12,10 +12,12 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 
-	// _, err = conn.Write([]byte("SEET Foo Bar 40000000"))
+	// _, err = conn.Write([]byte("SET Foo Bar 40000"))
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
+
+	// select {}
 
 	// return
 	var (

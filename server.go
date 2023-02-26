@@ -61,8 +61,11 @@ func (s *Server) Start() error {
 
 func (s *Server) handleConn(conn net.Conn) {
 	defer conn.Close()
-
 	buf := make([]byte, 2048)
+
+	if s.IsLeader {
+		s.followers[conn] = struct{}{}
+	}
 
 	fmt.Println("connection made: ", conn.RemoteAddr())
 	for {
@@ -124,7 +127,10 @@ func (s *Server) handleGetCommand(conn net.Conn, msg *Message) error {
 
 func (s *Server) sendToFollowers(ctx context.Context, msg *Message) error {
 	for conn := range s.followers {
-		_, err := conn.Write(msg.ToBytes())
+		fmt.Println("forwarding key to follower")
+		rawMsg := msg.ToBytes()
+		fmt.Println("forwarding raw messagege to followers: ", string(rawMsg))
+		_, err := conn.Write(rawMsg)
 		if err != nil {
 			fmt.Println("write to follower error: ", err)
 			continue
