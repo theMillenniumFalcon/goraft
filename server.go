@@ -64,6 +64,7 @@ func (s *Server) handleConn(conn net.Conn) {
 
 	buf := make([]byte, 2048)
 
+	fmt.Println("connection made: ", conn.RemoteAddr())
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
