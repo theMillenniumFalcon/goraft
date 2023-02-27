@@ -7,13 +7,14 @@ import (
 	"io"
 )
 
-type Status byte
-
 type Command byte
 
-type CommandGet struct {
-	Key []byte
-}
+const (
+	CmdNonce Command = iota
+	CmdSet
+	CmdGet
+	CmdDel
+)
 
 type CommandSet struct {
 	Key        []byte
@@ -21,51 +22,81 @@ type CommandSet struct {
 	TimeToLive int
 }
 
-type ResponseSet struct {
-	Status Status
-}
-
-const (
-	CmdNonce Command = iota
-	CmdSet
-	CmdGet
-	CmdDel
-	CmdJoin
-)
-
 func (c *CommandSet) Bytes() []byte {
 	buf := new(bytes.Buffer)
 	binary.Write(buf, binary.LittleEndian, CmdSet)
 
-	binary.Write(buf, binary.LittleEndian, int64(len(c.Key)))
-	binary.Write(buf, binary.LittleEndian, &c.Key)
+	keyLen := int32(len(c.Key))
+	binary.Write(buf, binary.LittleEndian, keyLen)
+	binary.Write(buf, binary.LittleEndian, c.Key)
 
-	binary.Write(buf, binary.LittleEndian, int64(len(c.Value)))
+	valueLen := int32(len(c.Value))
+	binary.Write(buf, binary.LittleEndian, valueLen)
 	binary.Write(buf, binary.LittleEndian, c.Value)
 
-	binary.Write(buf, binary.LittleEndian, int64(c.TimeToLive))
+	binary.Write(buf, binary.LittleEndian, int32(c.TimeToLive))
 
 	return buf.Bytes()
 }
 
-func ParseCommand(r io.Reader) {
+type CommandGet struct {
+	Key []byte
+}
+
+func (c *CommandGet) Bytes() []byte {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, CmdGet)
+
+	keyLen := int32(len(c.Key))
+	binary.Write(buf, binary.LittleEndian, keyLen)
+	binary.Write(buf, binary.LittleEndian, c.Key)
+
+	return buf.Bytes()
+}
+
+func ParseCommand(r io.Reader) (any, error) {
 	var cmd Command
-	binary.Read(r, binary.LittleEndian, &cmd)
+	if err := binary.Read(r, binary.LittleEndian, &cmd); err != nil {
+		return nil, err
+	}
 
 	switch cmd {
 	case CmdSet:
-		set := ParseSetCommand(r)
-		fmt.Println(set)
+		return parseSetCommand(r), nil
+	case CmdGet:
+		return parseGetCommand(r), nil
+	default:
+		return nil, fmt.Errorf("invalid command")
 	}
 }
 
-func ParseSetCommand(r io.Reader) *CommandSet {
+func parseSetCommand(r io.Reader) *CommandSet {
 	cmd := &CommandSet{}
 
-	var keyLength int64
-	binary.Read(r, binary.LittleEndian, keyLength)
-	cmd.Key = make([]byte, keyLength)
-	binary.Read(r, binary.LittleEndian, cmd.Key)
+	var keyLen int32
+	binary.Read(r, binary.LittleEndian, &keyLen)
+	cmd.Key = make([]byte, keyLen)
+	binary.Read(r, binary.LittleEndian, &cmd.Key)
+
+	var valueLen int32
+	binary.Read(r, binary.LittleEndian, &valueLen)
+	cmd.Value = make([]byte, valueLen)
+	binary.Read(r, binary.LittleEndian, &cmd.Value)
+
+	var ttl int32
+	binary.Read(r, binary.LittleEndian, &ttl)
+	cmd.TimeToLive = int(ttl)
+
+	return cmd
+}
+
+func parseGetCommand(r io.Reader) *CommandGet {
+	cmd := &CommandGet{}
+
+	var keyLen int32
+	binary.Read(r, binary.LittleEndian, &keyLen)
+	cmd.Key = make([]byte, keyLen)
+	binary.Read(r, binary.LittleEndian, &cmd.Key)
 
 	return cmd
 }
