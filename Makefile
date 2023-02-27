@@ -6,3 +6,6 @@ run: build
 
 runfollower: build
 	./bin/goraft --listenaddr :3000 --leaderaddr :4000
+
+test: 
+	@go test -v ./...

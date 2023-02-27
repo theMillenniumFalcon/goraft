@@ -38,7 +38,7 @@ func (c *CommandSet) Bytes() []byte {
 	binary.Write(buf, binary.LittleEndian, CmdSet)
 
 	binary.Write(buf, binary.LittleEndian, int64(len(c.Key)))
-	binary.Write(buf, binary.LittleEndian, c.Key)
+	binary.Write(buf, binary.LittleEndian, &c.Key)
 
 	binary.Write(buf, binary.LittleEndian, int64(len(c.Value)))
 	binary.Write(buf, binary.LittleEndian, c.Value)
