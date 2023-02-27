@@ -1,6 +1,7 @@
 package proto
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 )
@@ -13,5 +14,6 @@ func TestParseGetCommand(t *testing.T) {
 	}
 	fmt.Println(cmd.Bytes())
 
-	// r := bytes.NewReader(cmd.Bytes())
+	r := bytes.NewReader(cmd.Bytes())
+	ParseCommand(r)
 }

@@ -3,6 +3,8 @@ package proto
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
+	"io"
 )
 
 type Status byte
@@ -46,6 +48,24 @@ func (c *CommandSet) Bytes() []byte {
 	return buf.Bytes()
 }
 
-// func ParseCommand(r io.Reader) (any, error) {
+func ParseCommand(r io.Reader) {
+	var cmd Command
+	binary.Read(r, binary.LittleEndian, &cmd)
 
-// }
+	switch cmd {
+	case CmdSet:
+		set := ParseSetCommand(r)
+		fmt.Println(set)
+	}
+}
+
+func ParseSetCommand(r io.Reader) *CommandSet {
+	cmd := &CommandSet{}
+
+	var keyLength int64
+	binary.Read(r, binary.LittleEndian, keyLength)
+	cmd.Key = make([]byte, keyLength)
+	binary.Read(r, binary.LittleEndian, cmd.Key)
+
+	return cmd
+}
