@@ -41,7 +41,7 @@ func (c *CommandSet) Bytes() []byte {
 	binary.Write(buf, binary.LittleEndian, int64(len(c.Value)))
 	binary.Write(buf, binary.LittleEndian, c.Value)
 
-	binary.Write(buf, binary.LittleEndian, c.TimeToLive)
+	binary.Write(buf, binary.LittleEndian, int64(c.TimeToLive))
 
 	return buf.Bytes()
 }
