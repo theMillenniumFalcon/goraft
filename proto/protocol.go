@@ -1,7 +1,8 @@
 package proto
 
 import (
-	"io"
+	"bytes"
+	"encoding/binary"
 )
 
 type Status byte
@@ -30,10 +31,21 @@ const (
 	CmdJoin
 )
 
-func (r *CommandSet) Bytes() []byte {
+func (c *CommandSet) Bytes() []byte {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, CmdSet)
 
+	binary.Write(buf, binary.LittleEndian, int64(len(c.Key)))
+	binary.Write(buf, binary.LittleEndian, c.Key)
+
+	binary.Write(buf, binary.LittleEndian, int64(len(c.Value)))
+	binary.Write(buf, binary.LittleEndian, c.Value)
+
+	binary.Write(buf, binary.LittleEndian, c.TimeToLive)
+
+	return buf.Bytes()
 }
 
-func ParseCommand(r io.Reader) (any, error) {
+// func ParseCommand(r io.Reader) (any, error) {
 
-}
+// }
