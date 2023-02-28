@@ -78,5 +78,10 @@ func (s *Server) handleCommand(conn net.Conn, cmd any) {
 func (s *Server) handleSetCommand(conn net.Conn, cmd *proto.CommandSet) error {
 	log.Printf("SET %s to %s", cmd.Key, cmd.Value)
 
-	return s.cache.Set(cmd.Key, cmd.Value, time.Duration(cmd.TimeToLive))
+	if err := s.cache.Set(cmd.Key, cmd.Value, time.Duration(cmd.TimeToLive)); err != nil {
+		resp := proto.ResponseSet{
+			Status: proto.StatusError,
+		}
+		conn.Write(resp.Bytes())
+	}
 }

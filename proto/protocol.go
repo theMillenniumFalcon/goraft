@@ -7,7 +7,28 @@ import (
 	"io"
 )
 
+type Status byte
+
 type Command byte
+
+type CommandSet struct {
+	Key        []byte
+	Value      []byte
+	TimeToLive int
+}
+
+type CommandGet struct {
+	Key []byte
+}
+
+type ResponseSet struct {
+	Status Status
+}
+
+type ResponseGet struct {
+	Status Status
+	Value  []byte
+}
 
 const (
 	CmdNonce Command = iota
@@ -16,10 +37,29 @@ const (
 	CmdDel
 )
 
-type CommandSet struct {
-	Key        []byte
-	Value      []byte
-	TimeToLive int
+const (
+	StatusNone Status = iota
+	StatusOK
+	StatusError
+	StatusKeyNotFound
+)
+
+func (r ResponseSet) Bytes() []byte {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, r.Status)
+
+	return buf.Bytes()
+}
+
+func (r *ResponseGet) Bytes() []byte {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, r.Status)
+
+	valueLen := int32(len(r.Value))
+	binary.Write(buf, binary.LittleEndian, valueLen)
+	binary.Write(buf, binary.LittleEndian, r.Value)
+
+	return buf.Bytes()
 }
 
 func (c *CommandSet) Bytes() []byte {
@@ -37,10 +77,6 @@ func (c *CommandSet) Bytes() []byte {
 	binary.Write(buf, binary.LittleEndian, int32(c.TimeToLive))
 
 	return buf.Bytes()
-}
-
-type CommandGet struct {
-	Key []byte
 }
 
 func (c *CommandGet) Bytes() []byte {
