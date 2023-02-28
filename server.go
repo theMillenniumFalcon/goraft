@@ -78,10 +78,13 @@ func (s *Server) handleCommand(conn net.Conn, cmd any) {
 func (s *Server) handleSetCommand(conn net.Conn, cmd *proto.CommandSet) error {
 	log.Printf("SET %s to %s", cmd.Key, cmd.Value)
 
+	resp := proto.ResponseSet()
 	if err := s.cache.Set(cmd.Key, cmd.Value, time.Duration(cmd.TimeToLive)); err != nil {
-		resp := proto.ResponseSet{
-			Status: proto.StatusError,
-		}
-		conn.Write(resp.Bytes())
+		resp.Status = proto.StatusError
+		_, err := conn.Write(resp.Bytes())
+
+		return err
 	}
+
+	resp.Status = proto.StatusOK
 }
