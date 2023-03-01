@@ -69,6 +69,7 @@ func (r *ResponseGet) Bytes() []byte {
 func ParseSetResponse(r io.Reader) (*ResponseSet, error) {
 	resp := &ResponseSet{}
 	err := binary.Read(r, binary.LittleEndian, &resp.Status)
+
 	return resp, err
 }
 
@@ -88,9 +89,9 @@ func ParseGetResponse(r io.Reader) (*ResponseGet, error) {
 type CommandJoin struct{}
 
 type CommandSet struct {
-	Key   []byte
-	Value []byte
-	TTL   int
+	Key        []byte
+	Value      []byte
+	TimeToLive int
 }
 
 func (c *CommandSet) Bytes() []byte {
@@ -105,7 +106,7 @@ func (c *CommandSet) Bytes() []byte {
 	binary.Write(buf, binary.LittleEndian, valueLen)
 	binary.Write(buf, binary.LittleEndian, c.Value)
 
-	binary.Write(buf, binary.LittleEndian, int32(c.TTL))
+	binary.Write(buf, binary.LittleEndian, int32(c.TimeToLive))
 
 	return buf.Bytes()
 }
@@ -158,7 +159,7 @@ func parseSetCommand(r io.Reader) *CommandSet {
 
 	var ttl int32
 	binary.Read(r, binary.LittleEndian, &ttl)
-	cmd.TTL = int(ttl)
+	cmd.TimeToLive = int(ttl)
 
 	return cmd
 }
