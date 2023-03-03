@@ -12,6 +12,7 @@ import (
 	"github.com/theMillenniumFalcon/goraft/cache"
 	"github.com/theMillenniumFalcon/goraft/client"
 	"github.com/theMillenniumFalcon/goraft/proto"
+	"go.uber.org/zap"
 )
 
 type ServerOptions struct {
@@ -24,13 +25,18 @@ type Server struct {
 	ServerOptions
 	members map[*client.Client]struct{}
 	cache   cache.Cacher
+	logger  *zap.SugaredLogger
 }
 
 func NewServer(options ServerOptions, c cache.Cacher) *Server {
+	l, _ := zap.NewProduction()
+	lSugar := l.Sugar()
+
 	return &Server{
 		ServerOptions: options,
 		cache:         c,
 		members:       make(map[*client.Client]struct{}),
+		logger:        lSugar,
 	}
 }
 
@@ -48,7 +54,7 @@ func (s *Server) Start() error {
 		}()
 	}
 
-	log.Printf("server starting on port [%s]\n", s.ListenAddr)
+	s.logger.Infow("server starting", "addr", s.ListenAddr, "leader", s.IsLeader)
 
 	for {
 		conn, err := ln.Accept()
@@ -66,7 +72,7 @@ func (s *Server) dialLeader() error {
 		return fmt.Errorf("failed to dial leader [%s]", s.LeaderAddr)
 	}
 
-	log.Println("connected to leader:", s.LeaderAddr)
+	s.logger.Infow("connected to leader", "addr", s.LeaderAddr)
 
 	binary.Write(conn, binary.LittleEndian, proto.CmdJoin)
 
@@ -77,8 +83,6 @@ func (s *Server) dialLeader() error {
 
 func (s *Server) handleConn(conn net.Conn) {
 	defer conn.Close()
-
-	//fmt.Println("connection made:", conn.RemoteAddr())
 
 	for {
 		cmd, err := proto.ParseCommand(conn)
