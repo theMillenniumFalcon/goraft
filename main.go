@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/theMillenniumFalcon/goraft/cache"
 	"github.com/theMillenniumFalcon/goraft/client"
@@ -23,13 +22,6 @@ func main() {
 		IsLeader:   len(*leaderAddr) == 0,
 		LeaderAddr: *leaderAddr,
 	}
-
-	go func() {
-		time.Sleep(time.Second * 10)
-		if opts.IsLeader {
-			SendStuff()
-		}
-	}()
 
 	server := NewServer(opts, cache.New())
 	server.Start()
