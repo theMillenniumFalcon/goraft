@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"time"
 
@@ -28,20 +27,18 @@ func main() {
 
 	config.LocalID = "NPID"
 
-	ips, err := net.LookupIP("localhost")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(ips) == 0 {
-		log.Fatalf("localhost did not resolve to any IPs")
-	}
-	addr := &net.TCPAddr{IP: ips[0], Port: 4000}
+	// ips, err := net.LookupIP("localhost")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// if len(ips) == 0 {
+	// 	log.Fatalf("localhost did not resolve to any IPs")
+	// }
+	// addr := &net.TCPAddr{IP: ips[0], Port: 4000}
 
-	fmt.Println(addr)
-
-	tr, err := raft.NewTCPTransport(":3000", addr, 10, timeout, os.Stdout)
+	tr, err := raft.NewTCPTransport("127.0.0.1:3000", nil, 10, timeout, os.Stdout)
 	if err != nil {
-		log.Fatal("tcp net failed", err)
+		log.Fatal("tcp net failed: ", err)
 	}
 	r, err := raft.NewRaft(config, finiteStateMachine, stableStore, logStore, snapShotStore, tr)
 	if err != nil {
